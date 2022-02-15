@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Orchestral Piano</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/keyboard.css">
+</head>
+<body>
+<section>
+    <h1>Orchestral Piano</h1>
+    <div class="preamble">
+        <p> A system performing automatic orchestration from piano input</p>
+    </div>
+    <h3>Before you start, choose your piano input form:</h3>
+    <div class="settings controls small centered">
+
+        <br>
+        <label class="radio">
+            <input name="input" type="radio" id="inputKeyboard" checked>
+            <span class="control-indicator"></span>
+            Keyboard (live)
+        </label>
+        <br>
+        <label class="radio">
+            <input name="input" type="radio" id="inputMidi">
+            <span class="control-indicator"></span>
+            MIDI (live)
+        </label>
+        <div id="midiContainer" hidden>
+            <label>Input: <select id="selectMidiIn" class="button"></select></label>
+            <label>Output: <select id="selectMidiOut" class="button"></select></label>
+        </div>
+        <br>
+        <label class="radio">
+            <input name="input" type="radio" id="inputMidi">
+            <span class="control-indicator"></span>
+            MIDI (file)
+            <input class="button" type="file" value="upload">
+        </label>
+        <input type="file" style="width: auto" id="file"/>
+
+        <div id="textMidiNotSupported" hidden>MIDI isn't supported on this browser :(</div>
+        <br>
+        <button class="button" id="btnReady">
+            <span class="text">I'm ready!</span>
+        </button>
+    </div>
+</section>
+
+<section class="main" hidden>
+    <section class="controls centered rotate">
+        <h2>Your screen is not wide enough :(</h2>
+        <p>Your screen is not wide enough for this app to work well (it displays an octave worth's of keys, and they'll
+            be hard to press 😢).
+            If you're on mobile, please rotate your device. If you're on a very tiny mobile, I'm afraid you'll have to
+            look for a larger device.
+        </p>
+        <button class="button" onclick="document.querySelector('.rotate').hidden=true">
+            <span class="text">I don't care, hide this.</span>
+        </button>
+    </section>
+
+    <div class="keyboard-shadow">
+        <div class="keyboard-box">
+            <div class="horizontal">
+                <div>Tick:</div>
+                <div id="tickDisplay"></div>
+                <div id="statusUpdate">Loading soundfont files...</div>
+                <button hidden class="button instruments" title="change instrument">
+                    <select id="dropInstruments"></select>
+                    <span class="hide-select">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24"><path
+                        d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+              </span>
+                </button>
+            </div>
+
+            <div class="controls horizontal top">
+                <div class="vertical">
+                    <div class="horizontal" style="width:100%">
+                        <label class="small"
+                               title="A smaller number, like 0.3, means the generated drums are more conservative. A higher number, like 2, means that the generated drums will be more random. A value of 0 means that the drums will not be regenerated at every step.">
+                            <input value="1" id="inputTemperature" class="button round">
+                            temp
+                        </label>
+                        <label class="small">
+                            <input value="120" id="inputTempo" class="button round">
+                            bpm
+                        </label>
+                    </div>
+                    <button class="button round2" id="btnRecord" disabled style="width: 130px">
+                        <span class="knob"></span>
+                        <span class="text">record</span>
+                    </button>
+                </div>
+
+                <div class="visualizer">
+                    <div id="timeline"></div>
+                    <svg id="svgInput"></svg>
+                    <svg id="svgMelody"></svg>
+                    <svg id="svgDrums"></svg>
+                </div>
+
+                <div class="vertical">
+                    <button class="button round2" id="btnPlay">
+                        <!-- Icon from: https://material.io/resources/icons/ -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" class="play">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" class="stop"
+                             hidden>
+                            <path d="M6 6h12v12H6z"/>
+                        </svg>
+                        <span class="text">play</span>
+                    </button>
+                    <br>
+                    <button class="button round2" id="btnSave">
+                        <!-- Icon from: https://material.io/resources/icons/ -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                        </svg>
+                        <span class="text">save</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="horizontal bottom">
+                <div class="vertical volume-controls" disabled>
+                    <b class="volume-label">loops</b>
+                    <div class="horizontal">
+                        <div class="range-wrap"><input type="range" min="0" max="1" step="1" value="1"
+                                                       id="inputMuteDrums"></div>
+                        <div class="range-wrap"><input type="range" min="0" max="1" step="1" value="1"
+                                                       id="inputMuteInput"></div>
+                        <div class="range-wrap"><input type="range" min="0" max="1" step="1" value="1"
+                                                       id="inputMuteClick"></div>
+                    </div>
+                    <div class="horizontal">
+                        <label class="range-label">🥁</label>
+                        <label class="range-label">🎹</label>
+                        <label class="range-label">⏱</label>
+                    </div>
+                </div>
+
+                <div class="vertical">
+                    <div class="keyboard">
+                        <div class="white-keys">
+                            <button class="note-a pitch-0" data-pitch="0"><span>a</span></button>
+                            <button class="note-s pitch-2" data-pitch="2"><span>s</span></button>
+                            <button class="note-d pitch-4" data-pitch="4"><span>d</span></button>
+                            <button class="note-f pitch-5" data-pitch="5"><span>f</span></button>
+                            <button class="note-g pitch-7" data-pitch="7"><span>g</span></button>
+                            <button class="note-h pitch-9" data-pitch="9"><span>h</span></button>
+                            <button class="note-j pitch-11" data-pitch="11"><span>j</span></button>
+
+                            <button class="note-a pitch-0" data-pitch="12"><span>A</span></button>
+                            <button class="note-s pitch-2" data-pitch="14"><span>S</span></button>
+                            <button class="note-d pitch-4" data-pitch="16"><span>D</span></button>
+                            <button class="note-f pitch-5" data-pitch="17"><span>F</span></button>
+                            <button class="note-g pitch-7" data-pitch="19"><span>G</span></button>
+                            <button class="note-h pitch-9" data-pitch="21"><span>H</span></button>
+                            <button class="note-j pitch-11" data-pitch="23"><span>J</span></button>
+                        </div>
+                        <div class="black-keys" style="color: black;">
+                            <button class="note-w c pitch-1" data-pitch="1"><span>w</span></button>
+                            <button class="note-e d pitch-3" data-pitch="3"><span>e</span></button>
+                            <button class="note-t f pitch-6" data-pitch="6"><span>t</span></button>
+                            <button class="note-y g pitch-8" data-pitch="8"><span>y</span></button>
+                            <button class="note-u a pitch-10" data-pitch="10"><span>u</span></button>
+
+                            <button class="note-W c2 pitch-1" data-pitch="13"><span>W</span></button>
+                            <button class="note-E d2 pitch-3" data-pitch="15"><span>E</span></button>
+                            <button class="note-T f2 pitch-6" data-pitch="18"><span>T</span></button>
+                            <button class="note-Y g2 pitch-8" data-pitch="20"><span>Y</span></button>
+                            <button class="note-U a2 pitch-10" data-pitch="22"><span>U</span></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="vertical octaves">
+                    <button class="button round2" id="btnOctaveUp">z <span class="sans">↑</span></button>
+                    <span style="font-size: 12px;">octave</span>
+                    <button class="button round2" id="btnOctaveDown">x <span class="sans">↓</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="audio-container">
+
+    </div>
+</section>
+
+<br><br>
+
+<div class="waves">
+    <svg viewBox="0 0 100 20">
+        <path opacity="0.5" d="M0 25V10C35.5 -10.5 61.5 6.5 100 10V25H0Z" fill="rgb(53, 248, 255)"></path>
+        <path d="M0 25V7C20 10.3333 38.3333 10.3333 55 7C71.6667 3.66667 86.6667 3.33333 100 6V25H0Z" fill="#0000ff"
+              fill-opacity="0.5"></path>
+    </svg>
+</div>
+</body>
+
+<script src="/static/Tone.js"></script>
+<script src="/static/core.js"></script>
+<script src="/static/FileSaver.min.js" defer></script>
+
+<script src="/static/audio/visualizer.js"></script>
+<script src="/static/audio/input-recorder.js"></script>
+<script src="/static/audio/audio-loop.js"></script>
+<script src="/static/audio/metronome.js"></script>
+<script src="/static/script.js"></script>
+</html>
