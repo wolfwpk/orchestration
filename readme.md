@@ -26,10 +26,10 @@ Due to Github storage limited, check point has been ignored, download "all_instr
 
 #### Architecture
 
-![image-20220215135825875](F:\orchest\image-20220215135825875.png)
+![image-20220215135825875](image-20220215135825875.png)
 
-![image-20220215135847633](F:\orchest\image-20220215135847633.png)
+![image-20220215135847633](image-20220215135847633.png)
 
 
 
-![image-20220215135914825](F:\orchest\image-20220215135914825.png)
+![image-20220215135914825](image-20220215135914825.png)
