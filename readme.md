@@ -21,3 +21,15 @@ Flask
 Magenta ( not Magenta.js)
 
 Due to Github storage limited, check point has been ignored, download "all_instruments" checkpoint and put in /ckpt to recover: https://storage.googleapis.com/magentadata/models/gansynth/all_instruments.zip
+
+
+
+#### Architecture
+
+![image-20220215135825875](F:\orchest\image-20220215135825875.png)
+
+![image-20220215135847633](F:\orchest\image-20220215135847633.png)
+
+
+
+![image-20220215135914825](F:\orchest\image-20220215135914825.png)
